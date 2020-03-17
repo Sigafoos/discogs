@@ -55,7 +55,8 @@ export default {
             lastListenedID: undefined,
             albums: [],
             rawQuery: '',
-            unlistened: undefined
+            unlistened: undefined,
+            username: undefined
         }
     },
     props: {
@@ -72,8 +73,22 @@ export default {
             };
         }
     },
-    created: function () {
-        fetch('https://api.discogs.com/users/dconley/collection/fields', {
+    created: async function () {
+        this.username = localStorage.getItem('discogs_username');
+        if (!this.username) {
+            console.log('need a username');
+            await fetch('https://api.discogs.com/oauth/identity', {
+                headers: {
+                'Authorization': 'Discogs token=' + this.token
+                }})
+            .then(resp => resp.json())
+            .then(resp => {
+                this.username = resp.username;
+                localStorage.setItem('discogs_username', this.username)
+            })
+            .catch(err => console.error(err))
+        }
+        fetch('https://api.discogs.com/users/' + this.username + '/collection/fields', {
             headers: {
                 'Authorization': 'Discogs token=' + this.token
         }})
@@ -99,8 +114,7 @@ export default {
     },
     methods: {
         fetchAlbums: function (page=1) {
-            // TODO HARDCODED OH NOOO
-            fetch('https://api.discogs.com/users/dconley/collection/folders/0/releases?sort=added&page=' + page, {
+            fetch('https://api.discogs.com/users/' + this.username + '/collection/folders/0/releases?sort=added&page=' + page, {
                 headers: {
                     'Authorization': 'Discogs token=' + this.token
                 }
@@ -119,7 +133,7 @@ export default {
         },
         listen: function (i, listens) {
             let album = this.albums[i];
-            fetch('https://api.discogs.com/users/dconley/collection/folders/0/releases/' + album.basic_information.id + '/instances/' + album.instance_id + '/fields/' + this.listensID, {
+            fetch('https://api.discogs.com/users/' + this.username + '/collection/folders/0/releases/' + album.basic_information.id + '/instances/' + album.instance_id + '/fields/' + this.listensID, {
                 method: 'POST',
                 body: JSON.stringify({value: String(listens.count)}),
                 headers: {
@@ -128,7 +142,7 @@ export default {
                 }
             })
             .catch(err => console.error(err));
-            fetch('https://api.discogs.com/users/dconley/collection/folders/0/releases/' + album.basic_information.id + '/instances/' + album.instance_id + '/fields/' + this.lastListenedID, {
+            fetch('https://api.discogs.com/users/' + this.username + '/collection/folders/0/releases/' + album.basic_information.id + '/instances/' + album.instance_id + '/fields/' + this.lastListenedID, {
                 method: 'POST',
                 body: JSON.stringify({value: String(listens.latest)}),
                 headers: {
