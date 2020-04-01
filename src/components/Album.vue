@@ -3,12 +3,20 @@
 <b-card
 class="m-2"
 tag="article"
-:title="data.basic_information.title"
 :sub-title="artists"
-:img-src="image"
+no-body
 >
-    <b-button @click="listen">Listened to</b-button>
-    <Listens :data="listens" />
+    <b-link :href="url">
+        <b-card-img :src="image" alt="Image" top></b-card-img>
+    </b-link>
+    <b-card-body>
+        <b-card-title>{{ data.basic_information.title }}</b-card-title>
+        <b-card-sub-title>{{ artists }}</b-card-sub-title>
+    </b-card-body>
+    <b-card-footer>
+        <b-button @click="listen">Listened to</b-button>
+        <Listens :data="listens" />
+    </b-card-footer>
 </b-card>
 </b-col>
 </template>
@@ -48,6 +56,9 @@ export default {
         },
         show: function () {
             return this.matchesQuery && this.matchesListened;
+        },
+        url: function () {
+            return 'https://www.discogs.com/release/' + this.data.basic_information.id;
         }
     },
     created: function () {
