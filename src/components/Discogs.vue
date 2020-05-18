@@ -3,7 +3,6 @@
     <b-alert v-if="error" show variant="danger">
         {{ error }}
     </b-alert>
-    <p v-else-if="loading">loading...</p>
     <div v-else>
         <b-row>
             <h2>Filters/sort</h2>
@@ -19,6 +18,7 @@
             </b-form-checkbox>
         </b-row>
         <b-row><h2>Albums</h2></b-row>
+        <b-row><p v-if="loading">{{ loadingMessage }}</p></b-row>
         <b-row>
             <Album
                 v-for="(album, id) in albums"
@@ -50,6 +50,7 @@ export default {
     data: function () {
         return {
             loading: true,
+            loadingMessage: 'loading...',
             error: undefined,
             listensID: undefined,
             lastListenedID: undefined,
@@ -124,11 +125,13 @@ export default {
             .catch(err => console.error(err));
         },
         appendAlbums: function (resp) {
-            this.loading = false;
             this.albums.push(...resp.releases);
-        console.log(resp);
+            console.log(resp);
             if (resp.pagination.page < resp.pagination.pages) {
+                this.loadingMessage = 'loading (' + Math.floor(resp.pagination.page / resp.pagination.pages * 100) + '%)';
                 this.fetchAlbums(resp.pagination.page+1);
+            } else {
+                this.loading = false;
             }
         },
         listen: function (i, listens) {
