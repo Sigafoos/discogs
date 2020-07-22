@@ -62,6 +62,9 @@ export default {
         }
     },
     created: function () {
+        if (this.show) {
+            this.$emit('show', this.id);
+        }
         if (!this.data.notes) return;
 
         for (let note of this.data.notes) {
@@ -71,6 +74,11 @@ export default {
                 this.listens.latest = note.value;
             }
         }
+    },
+    updated: function () {
+         if (this.show) {
+             this.$emit('show', this.id);
+         }
     },
     data: function () {
         return {

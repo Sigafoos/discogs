@@ -6,18 +6,33 @@
     <div v-else>
         <b-row>
             <h2>Filters/sort</h2>
-            <b-form-input v-model="rawQuery" placeholder="filter by title/artist" />
+            <b-form-input
+                v-model="rawQuery"
+                placeholder="filter by title/artist"
+                @update="clearShown"
+            />
             <b-form-checkbox
                 id="unlistened"
                 v-model="unlistened"
                 name="unlistened-1"
                 value="1"
                 unchecked-value=""
+                @change="clearShown"
             >
                 unlistened only
             </b-form-checkbox>
         </b-row>
-        <b-row><h2>Albums</h2></b-row>
+        <b-row>
+            <h2>
+               Albums
+            <span
+                class="text-muted"
+                v-if="albums.length"
+            >
+              ({{ shownAlbums.length }} / {{ albums.length }})
+            </span>
+            </h2>
+        </b-row>
         <b-row><p v-if="loading">{{ loadingMessage }}</p></b-row>
         <b-row>
             <Album
@@ -29,6 +44,7 @@
                 :lastListenedID="lastListenedID"
                 :filters="filters"
                 @listen="listen"
+                @show="countShow"
             />
         </b-row>
     </div>
@@ -55,6 +71,7 @@ export default {
             listensID: undefined,
             lastListenedID: undefined,
             albums: [],
+            shownAlbums: [],
             rawQuery: '',
             unlistened: undefined,
             username: undefined
@@ -154,6 +171,13 @@ export default {
                 }
             })
             .catch(err => console.error(err));
+        },
+        countShow: function(album) {
+            this.shownAlbums.push(album);
+        },
+        clearShown: function() {
+            console.log('clearing');
+            this.shownAlbums = [];
         }
     }
 }
